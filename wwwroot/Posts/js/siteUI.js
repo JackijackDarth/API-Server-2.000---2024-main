@@ -541,106 +541,96 @@ function showAccountForm() {
   else user = loggedUser.User;
   hidePosts();
   $("#form").show();
-  $("#abort").show();
-  $("#form").empty();
-  $("#form").append(`
-          <form class="form" id="postForm">
-              <input type="hidden" name="Id" value="${user.Id}"/>
-               <input type="hidden" name="Created" value="${user.Created}"/>
-               
-               ${
-                 !create
-                   ? `
-                  <input type="hidden" name="Authorizations" value="${
-                    loggedUser.User.Authorizations || ""
-                  }" />
-                  <input type="hidden" name="Access_token" value="${
-                    loggedUser.Access_token || ""
-                  }" />
-                  <input type="hidden" name="VerifyCode" value="${
-                    loggedUser.User.VerifyCode || ""
-                  }" />
-                `
-                   : ""
-               }
-  
-              <div class="mb-2 form-control">
-              <label for="Email" class="form-label">Adresse courriel </label>
-              <input
-                  type="Email"
-                  class="mb-2 form-control"
-                  name="Email"
-                  id="Email"
-                  placeholder="Courriel"
-                  required
-                  RequireMessage="Veuillez entrer votre courriel"
-                  CustomErrorMessage="Ce courriel existe déjà!"
-                  value="${user.Email}"
-              />
-              <input 
-                  type="Email"
-                  class="mb-1 form-control MatchedInput"
-                  name="ConfirmEmail" 
-                  id="confirmEmail"  placeholder="Vérification"
-                  required
-                  RequireMessage="Veuillez entrer votre courriel a nouveau"
-                  InvalidMessage="Le courriel est different"
-                  value="${user.Email}"
-                  matchedInputId="email"  />
-              </div>
-              <div id="emailError" class="form-text text-danger" style="display: none;"></div>
-  
-                     <div class="mb-2 form-control">
-              <label for="Password" class="form-label">Mot de passe </label>
-              <input 
-                  type="Password"
-                  class="mb-2 form-control"
-                  name="Password"
-                  id="password"
-                  placeholder="Mot de passe"  ${
-                    !create ? "" : "required"
-                  }  RequireMessage="Veuillez entrer un mot de passe"
-                  value=""  />
-              <input 
-                  type="Password"
-                  class="mb-1 form-control MatchedInput"
-                  name="ConfirmPassword" 
-                  id="confirmPassword"  placeholder="Vérification"
-                  ${!create ? "" : "required"}
-                  RequireMessage="Veuillez entrer votre mot de passe a nouveau"
-                  InvalidMessage="Les mots de passe ne correspondent pas"
-                  value=""  matchedInputId="password"  />
-              </div>
-  
-                <div class="mb-2 form-control">
-              <label for="Name" class="form-label">Nom</label>
-              <input 
-                  class="mb-2 form-control"
-                  name="Name"
-                  id="Name"
-                  placeholder="Nom"
-                  required
-                  RequireMessage="Veuillez entrer un mot de passe"
-                  value="${user.Name}"
-              />
-               </div>
-  
-              <div class="form-control">
-              <label class="form-label">Avatar </label>
-              <div class='imageUploaderContainer'>
-                  <div class='imageUploader' 
-                       newImage='${create}' 
-                       controlId='Avatar' 
-                       imageSrc='${user.Avatar}' 
-                       waitingImage="Loading_icon.gif">
-                  </div>
-              </div>
-              </div>
-  
-              <input type="submit" value="Enregistrer" id="savePost" class="btn btn-primary">
-              <input type="submit" value="Annuler" id="cancel" class="btn btn-secondary">
-          </form>
-      `);
+    $("#abort").show();
+    $("#form").empty();
+    $("#form").append(`
+        <form class="form" id="postForm">
+            <input type="hidden" name="Id" value="${user.Id}"/>
+            <input type="hidden" name="Created" value="${user.Created}"/>
+            ${
+                !create
+                    ? `
+                <input type="hidden" name="Authorizations" value="${loggedUser.User.Authorizations || ""}" />
+                <input type="hidden" name="Access_token" value="${loggedUser.Access_token || ""}" />
+                <input type="hidden" name="VerifyCode" value="${loggedUser.User.VerifyCode || ""}" />
+            `
+                    : ""
+            }
+            <div class="mb-2 form-control">
+                <label for="Email" class="form-label">Adresse courriel </label>
+                <input
+                    type="Email"
+                    class="mb-2 form-control"
+                    name="Email"
+                    id="Email"
+                    placeholder="Courriel"
+                    required
+                    RequireMessage="Veuillez entrer votre courriel"
+                    CustomErrorMessage="Ce courriel existe déjà!"
+                    value="${user.Email}"
+                />
+                <input 
+                    type="Email"
+                    class="mb-1 form-control MatchedInput"
+                    name="ConfirmEmail" 
+                    id="confirmEmail"  placeholder="Vérification"
+                    required
+                    RequireMessage="Veuillez entrer votre courriel a nouveau"
+                    InvalidMessage="Le courriel est différent"
+                    value="${user.Email}"
+                    matchedInputId="email"  />
+            </div>
+            <div id="emailError" class="form-text text-danger" style="display: none;"></div>
+            <div class="mb-2 form-control">
+                <label for="Password" class="form-label">Mot de passe </label>
+                <input 
+                    type="Password"
+                    class="mb-2 form-control"
+                    name="Password"
+                    id="password"
+                    placeholder="Mot de passe" ${!create ? "" : "required"}  
+                    RequireMessage="Veuillez entrer un mot de passe"
+                    value=""  
+                />
+                <input 
+                    type="Password"
+                    class="mb-1 form-control MatchedInput"
+                    name="ConfirmPassword" 
+                    id="confirmPassword"  placeholder="Vérification"
+                    ${!create ? "" : "required"}
+                    RequireMessage="Veuillez entrer votre mot de passe à nouveau"
+                    InvalidMessage="Les mots de passe ne correspondent pas"
+                    value=""  
+                    matchedInputId="password"  
+                />
+            </div>
+            <div class="mb-2 form-control">
+                <label for="Name" class="form-label">Nom</label>
+                <input 
+                    class="mb-2 form-control"
+                    name="Name"
+                    id="Name"
+                    placeholder="Nom"
+                    required
+                    RequireMessage="Veuillez entrer un nom"
+                    value="${user.Name}"
+                />
+            </div>
+            <div class="form-control">
+                <label class="form-label">Avatar </label>
+                <div class='imageUploaderContainer'>
+                    <div class='imageUploader' 
+                        newImage='${create}' 
+                        controlId='Avatar' 
+                        imageSrc='${user.Avatar}' 
+                        waitingImage="Loading_icon.gif">
+                    </div>
+                </div>
+            </div>
+            <input type="submit" value="Enregistrer" id="savePost" class="btn btn-primary">
+            <input type="button" value="${create ? "Annuler" : "Supprimer"}" id="cancel" class="btn ${create ? "btn-secondary" : "btn-danger"}">
+        </form>
+    `);
 
   initImageUploaders();
   initFormValidation();
@@ -686,9 +676,49 @@ function showAccountForm() {
         showError("Une erreur est survenue! ", Users_API.currentHttpError);
     }
   });
-  $("#cancel").on("click", async function () {
-     showLoginForm();
-  });
+  if (!create) {
+    
+    $("#cancel").on("click", async function () {
+        const confirmed = confirm("Êtes-vous sûr de vouloir supprimer votre compte?");
+        if (confirmed) {
+            try {
+              
+                
+
+               
+                const result = await Users_API.Delete(loggedUser,loggedUser.User.Id);
+                if (result) {
+                  const likes = await Likes_API.Get();
+                const userId = loggedUser.User.Id;
+                const posts = await Posts_API.Get();
+                for (const post of posts.data) {
+                    if (post.PosterId === userId) {
+                        await Posts_API.Delete(post.Id);
+                    }
+                }
+               
+                for (const like of likes.data) {
+                    if (like?.UserId === userId) {
+                        await Likes_API.Delete(like.Id);
+                    }
+                }
+                    localStorage.removeItem("loggedUser");
+                    await showLoginForm();
+                } else {
+                    showError("Une erreur est survenue lors de la suppression du compte.");
+                }
+            } catch (error) {
+                console.error("Erreur lors de la suppression des données de l'utilisateur:", error);
+                showError("Une erreur est survenue. Veuillez réessayer.");
+            }
+        }
+    });
+} else {
+    // Add cancel functionality for creation mode
+    $("#cancel").on("click", async function () {
+        await showLoginForm();
+    });
+}
 }
 
 function attach_Posts_UI_Events_Callback() {

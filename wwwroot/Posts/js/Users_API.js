@@ -1,6 +1,6 @@
 
 class Users_API {
-    static Host_URL() { return "https://enormous-decorous-shrine.glitch.me"; }
+    static Host_URL() { return "https://capable-organized-walrus.glitch.me"; }
     //static Host_URL() { return "http://localhost:5000"; }
     static API_URL() { return this.Host_URL() + "/Accounts" };
     //Token?
@@ -74,11 +74,14 @@ class Users_API {
             });
         });
     }
-    static async Delete(id) {
+    static async Delete(data,id) {
         return new Promise(resolve => {
             $.ajax({
-                url: this.API_URL() + "/" + id,
-                type: "DELETE",
+                url: this.API_URL() + "/remove/" + id,
+                type: "GET",
+                headers: {
+                    authorization: "Bearer " + data.Access_token,
+                  },
                 complete: () => {
                     Users_API.initHttpState();
                     resolve(true);

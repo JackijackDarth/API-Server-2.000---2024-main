@@ -1,5 +1,5 @@
 class Likes_API {
-   static Host_URL() { return "https://enormous-decorous-shrine.glitch.me"; }
+   static Host_URL() { return "https://capable-organized-walrus.glitch.me"; }
     //static Host_URL() { return "http://localhost:5000"; }
     static API_URL() { return this.Host_URL() + "/api/likes"; }
 
