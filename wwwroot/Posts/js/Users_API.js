@@ -1,6 +1,7 @@
 
 class Users_API {
-    static Host_URL() { return "http://localhost:5000"; }
+    static Host_URL() { return "https://enormous-decorous-shrine.glitch.me"; }
+    //static Host_URL() { return "http://localhost:5000"; }
     static API_URL() { return this.Host_URL() + "/Accounts" };
     //Token?
 
@@ -63,7 +64,7 @@ class Users_API {
             $.ajax({
                 url: create ? this.API_URL() + "/register" : this.API_URL() + "/modify",
                 headers: {
-                    authorization: "Bearer " + data.Access_Token ,
+                    authorization: "Bearer " + data.Access_token ,
                   },
                 type: create ? "POST" : "PUT",
                 contentType: 'application/json',
@@ -119,7 +120,7 @@ class Users_API {
         Users_API.initHttpState();
         return new Promise(resolve => {
             $.ajax({
-                url: this.API_URL() + "/logout?userId=" + id,
+                url: this.API_URL() + "/verify?id=" + id+"&code=" + code,
                 complete: data => {
                     resolve({ ETag: data.getResponseHeader('ETag'), data: data.responseJSON });
                 },

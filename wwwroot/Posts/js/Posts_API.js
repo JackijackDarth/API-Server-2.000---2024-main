@@ -1,6 +1,7 @@
 
 class Posts_API {
-    static Host_URL() { return "http://localhost:5000"; }
+     static Host_URL() { return "https://enormous-decorous-shrine.glitch.me"; }
+    //static Host_URL() { return "http://localhost:5000"; }
     static API_URL() { return this.Host_URL() + "/api/posts" };
     
 

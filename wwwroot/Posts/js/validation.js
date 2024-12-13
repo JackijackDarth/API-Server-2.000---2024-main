@@ -109,6 +109,7 @@ function remoteValidation(url) {
 }
 async function ConflictTestRequest(serviceUrl, fieldName) {
     let fieldControl = $('#' + fieldName);
+    console.log(fieldName)
     let testConflictURL = serviceUrl + "?" + fieldName + "=" + fieldControl.val() + "&Id=" + $("#Id").val();
     let result = await remoteValidation(testConflictURL);
     if (result)

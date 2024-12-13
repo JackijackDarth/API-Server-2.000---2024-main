@@ -1,5 +1,6 @@
 class Likes_API {
-    static Host_URL() { return "http://localhost:5000"; }
+   static Host_URL() { return "https://enormous-decorous-shrine.glitch.me"; }
+    //static Host_URL() { return "http://localhost:5000"; }
     static API_URL() { return this.Host_URL() + "/api/likes"; }
 
     static initHttpState() {
@@ -16,7 +17,18 @@ class Likes_API {
         this.currentStatus = xhr.status;
         this.error = true;
     }
-
+    static async HEAD() {
+      Likes_API.initHttpState();
+      return new Promise(resolve => {
+          $.ajax({
+              url: this.API_URL(),
+              type: 'HEAD',
+              contentType: 'text/plain',
+              complete: data => { resolve(data.getResponseHeader('ETag')); },
+              error: (xhr) => { Likes_API.setHttpErrorState(xhr); resolve(null); }
+          });
+      });
+  }
     static async Save(data) {
       Posts_API.initHttpState();
       return new Promise(resolve => {

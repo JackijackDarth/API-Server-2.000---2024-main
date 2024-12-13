@@ -10,7 +10,9 @@ const keywordsOnchangeDelay = 500;
 let categories = [];
 let selectedCategory = "";
 let currentETag = "";
+let currentlETag = "";
 let currentPostsCount = -1;
+let currentLikesCount = -1;
 let periodic_Refresh_paused = false;
 let postsPanel;
 let itemLayout;
@@ -187,8 +189,18 @@ function start_Periodic_Refresh() {
   setInterval(async () => {
     if (!periodic_Refresh_paused) {
       let etag = await Posts_API.HEAD();
+      let letag = await Likes_API.HEAD();
       // the etag contain the number of model records in the following form
       // xxx-etag
+      let likesCount = parseInt(letag.split("-")[0]);
+      if (currentlETag != letag) {
+        if (likesCount != currentLikesCount) {
+          console.log("likesCount", likesCount);
+          currentLikesCount = likesCount;
+          $("#reloadPosts").removeClass("white");
+        } else await showPosts();
+        currentlETag = letag;
+      }
       let postsCount = parseInt(etag.split("-")[0]);
       if (currentETag != etag) {
         if (postsCount != currentPostsCount) {
@@ -244,17 +256,17 @@ function renderPost(post) {
   `;
 
   let likeIconHTML = `
-    <span class="likeCmd fa fa-thumbs-up" postId="${post.Id}" title="Like">
+    <span class="likeCmd cmdIconLike fa fa-thumbs-up" postId="${post.Id}" >
     <span class="likeCount">0</span>
     </span>
   `;
-  // ${loggedUser && loggedUser?.User.Id == post.PosterId && loggedUser?.User.isSuper ? crudIconEdit : ""}
+  // 
   return $(`
     <div class="post" id="${post.Id}">
       <div class="postHeader">
         ${post.Category}
-        ${true ? crudIconEdit : ""}
-        ${loggedUser && loggedUser?.User.Id == post.PosterId || loggedUser?.User.isAdmin ? crudIconDelete : ""}
+        ${loggedUser && loggedUser?.User.Id == post.PosterId && loggedUser?.User.isSuper ? crudIconEdit : "<span></span>"}
+        ${loggedUser && loggedUser?.User.Id == post.PosterId || loggedUser?.User.isAdmin ? crudIconDelete : "<span></span>"}
         ${loggedUser ? likeIconHTML : ""}
       </div>
       <div class="postTitle">${post.Title}</div>
@@ -447,7 +459,7 @@ function showLoginForm() {
   $("#userForm").on("submit", async function (event) {
     event.preventDefault();
 
-    // Clear any existing errors
+   
     $("#emailError").hide().text("");
     $("#passwordError").hide().text("");
 
@@ -457,11 +469,11 @@ function showLoginForm() {
     if (!Users_API.error) {
       localStorage.setItem("loggedUser", JSON.stringify(loggedUser));
       if (loggedUser.User.VerifyCode == "unverified") {
-        // Handle unverified user case
+          await showVerifForm()
       }
-      await showPosts();
+      else await showPosts();
     } else {
-      // Display appropriate error messages based on the response
+     
       if (Users_API.currentHttpError === "This user email is not found.") {
         $("#emailError").text("Adresse courriel invalide.").show();
       } else if (Users_API.currentHttpError === "Wrong password.") {
@@ -480,7 +492,6 @@ function showLoginForm() {
   });
 }
 function showVerifForm() {
-  User = newUser();
   hidePosts();
   $("#form").show();
   $("#commit").hide();
@@ -492,8 +503,8 @@ function showVerifForm() {
           <form class="form" id="userForm">
               <input 
                   class="form-control"
-                  name="Email" 
-                  id="Email" 
+                  name="Code" 
+                  id="Code" 
                   placeholder="Code de vérification de courriel"
                   required
                   RequireMessage="Veuillez entrer un code"
@@ -506,14 +517,11 @@ function showVerifForm() {
 
   $("#userForm").on("submit", async function (event) {
     event.preventDefault();
-    let lgnInfo = getFormData($("#userForm"));
-    loggedUser = await Users_API.Login(lgnInfo);
+    let formdata = getFormData($("#userForm"));
+    console.log(formdata)
+    await Users_API.Verify(loggedUser.User.Id, formdata.Code);
     if (!Users_API.error) {
-      localStorage.setItem("loggedUser", JSON.stringify(loggedUser));
-      if (loggedUser.User.VerifyCode != "verified") {
-        showAccountForm();
-      }
-
+      console.log("le user a ete verifier")
       await showPosts();
     } else {
       showError("Une erreur est survenue! ", Users_API.currentHttpError);
@@ -546,7 +554,7 @@ function showAccountForm() {
                   <input type="hidden" name="Authorizations" value="${
                     loggedUser.User.Authorizations || ""
                   }" />
-                  <input type="hidden" name="Access_Token" value="${
+                  <input type="hidden" name="Access_token" value="${
                     loggedUser.Access_token || ""
                   }" />
                   <input type="hidden" name="VerifyCode" value="${
@@ -562,10 +570,11 @@ function showAccountForm() {
                   type="Email"
                   class="mb-2 form-control"
                   name="Email"
-                  id="email"
+                  id="Email"
                   placeholder="Courriel"
                   required
                   RequireMessage="Veuillez entrer votre courriel"
+                  CustomErrorMessage="Ce courriel existe déjà!"
                   value="${user.Email}"
               />
               <input 
@@ -635,49 +644,50 @@ function showAccountForm() {
 
   initImageUploaders();
   initFormValidation();
-
+  let conflit = addConflictValidation("http://localhost:5000/accounts/conflict","Email","savePost")
   $("#commit").click(function () {
     $("#commit").off();
     return $("#savePost").trigger("click");
   });
   $("#postForm").on("submit", async function (event) {
     $("#emailError").hide().text("");
-    // addConflictValidation("http://localhost:5000/accounts/conflict","Email","savePost")
     event.preventDefault();
     const confirmEmail = $("#confirmEmail");
     const confirmPassword = $("#confirmPassword");
+    let showverif = false;
     confirmEmail.remove();
     confirmPassword.remove();
     let user = getFormData($("#postForm"));
-    if (!create) {
-      if (user.Email && user.Email.trim()) {
-        loggedUser.User.Email = user.Email;
-      }
-      if (user.Name && user.Name.trim()) {
-        loggedUser.User.Name = user.Name;
-      }
-      if (user.Avatar && user.Avatar.trim()) {
-        loggedUser.User.Avatar = user.Avatar;
-      }
-    }
+    
 
     if (create) user.Created = Local_to_UTC(Date.now());
     userr = await Users_API.Save(user, create);
     console.log(userr);
     if (!Users_API.error) {
       if (!create)
+        
+          if (user.Email && user.Email.trim()) {
+            loggedUser.User.Email = user.Email;
+            showverif = true;
+            
+          }
+          if (user.Name && user.Name.trim()) {
+            loggedUser.User.Name = user.Name;
+          }
+          if (user.Avatar && user.Avatar.trim()) {
+            loggedUser.User.Avatar = user.Avatar;
+          }
         localStorage.setItem("loggedUser", JSON.stringify(loggedUser));
-      await showPosts();
+      
+      if (!showverif) await showPosts();
+      else  showVerifForm()
     }
-    if (Users_API.currentHttpError === "Unicity conflict on [Email]...") {
-      $("#emailError").text("Adresse courriel invalide.").show();
+    else {
+        showError("Une erreur est survenue! ", Users_API.currentHttpError);
     }
-    // else {
-    //     showError("Une erreur est survenue! ", Users_API.currentHttpError);
-    // }
   });
   $("#cancel").on("click", async function () {
-    await showLoginForm();
+     showLoginForm();
   });
 }
 
@@ -730,8 +740,7 @@ function attach_Posts_UI_Events_Callback() {
         .addClass("hideExtra")
         .removeClass("showExtra");
     });
-
-  $(".likeCmd").on("click", async function (event) {
+    $(".likeCmd").off().click(async function (event) {
     if (loggedUser) {
       event.preventDefault();
       const postId = $(this).attr("postId");
@@ -1016,6 +1025,8 @@ function loadLoggedUser() {
 async function renderLikeButton(postId) {
   try {
     const likes = await Likes_API.Get();
+    currentlETag = likes.ETag;
+    currentLikesCount = parseInt(currentlETag.split("-")[0]);
     console.log(likes);
 
     let postLikes = [];
@@ -1032,9 +1043,8 @@ async function renderLikeButton(postId) {
         }
       }
     }
-
+    console.log(postLikes)
     const nblike = postLikes.length;
-    console.log(usernames);
 
     const likeButton = $(`.likeCmd[postid="${postId}"]`);
     likeButton.css("color", hasLiked ? "blue" : "gray");
@@ -1042,7 +1052,7 @@ async function renderLikeButton(postId) {
     likeButton.children(".likeCount").text(nblike);
 
     likeButton.attr("title", usernames.join(", "));
-    likeButton.tooltip();
+   
   } catch (error) {
     console.error(`Erreur pour Like Post ${postId}:`, error);
   }
